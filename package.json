@@ -1,0 +1,27 @@
+{
+  "name": "redis-job-orchestrator",
+  "version": "1.0.0",
+  "description": "A BullMQ-inspired distributed job queue built from first principles in Node.js, utilizing Redis sorted sets, Lua scripts, and Node.js worker threads.",
+  "main": "worker.js",
+  "scripts": {
+    "start": "node worker.js",
+    "api": "node api/server.js",
+    "test": "node --test tests/**/*.test.js"
+  },
+  "keywords": [
+    "redis",
+    "job-queue",
+    "worker-threads",
+    "lua-scripting",
+    "bullmq-alternative",
+    "distributed-systems"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "ioredis": "^5.11.1",
+    "uuid": "^14.0.0"
+  }
+}
