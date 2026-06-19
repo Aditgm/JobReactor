@@ -1,0 +1,57 @@
+version: '3.9'
+services:
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes: ["redis_data:/data"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 5
+
+  worker:
+    build: .
+    command: node worker.js
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_NAME=default
+      - CONCURRENCY=8
+    depends_on:
+      redis: { condition: service_healthy }
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+
+  api:
+    build: .
+    command: node api/server.js
+    ports: ["3000:3000"]
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - QUEUE_NAME=default
+    depends_on:
+      redis: { condition: service_healthy }
+
+  dashboard:
+    build: 
+      context: ./dashboard
+    ports: ["3001:3001"]
+    environment:
+      - VITE_API_URL=http://localhost:3000/api
+    command: npm run dev -- --host 0.0.0.0 --port 3001
+    volumes:
+      - ./dashboard:/app
+      - /app/node_modules
+
+volumes:
+  redis_data:
